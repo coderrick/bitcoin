@@ -129,6 +129,9 @@ public:
     //! List locked coins.
     virtual void listLockedCoins(std::vector<COutPoint>& outputs) = 0;
 
+ //! Whether this address has been used.
+    virtual bool isUsedAddress(const CTxDestination& dst) = 0;
+    
     //! Create transaction.
     virtual CTransactionRef createTransaction(const std::vector<CRecipient>& recipients,
         const CCoinControl& coin_control,

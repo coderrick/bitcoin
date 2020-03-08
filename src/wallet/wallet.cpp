@@ -761,7 +761,27 @@ bool CWallet::IsSpentKey(const uint256& hash, unsigned int n) const
     }
     return false;
 }
+void CWallet::SetUsedAddressState(WalletBatch& batch, const CTxOut& cout, bool used)
+{
+    AssertLockHeld(cs_wallet);
+    CTxDestination dst;
+    if(ExtractDestination(cout.scriptPubKey, dst)) {
+        if(IsMine(dst)) {
+            if (used && !GetDestData(dst, "address_used", nullptr)) {
+                AddDestData(batch, dst, "address_used", "p"); // p for "present", opposite of absent (null)
+            } else if (!used && GetDestData(dst, "address_used", nullptr)) {
+                EraseDestData(batch, dst, "address_used");
+            }
+        }
+    }
 
+}
+
+bool CWallet::IsUsedAddress(const CTxDestination& dst) const
+{
+    LOCK(cs_wallet);
+    return IsMine(dst) && GetDestData(dst, "address_used", nullptr);
+}
 bool CWallet::AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose)
 {
     LOCK(cs_wallet);
@@ -780,6 +800,10 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose)
         }
 
         MarkDestinationsDirty(tx_destinations);
+    for (const CTxOut& txout : wtxIn.tx->vout) {
+            SetUsedAddressState(batch, txout, true);
+        }
+
     }
 
     // Inserts only if not already there, returns tx inserted or tx found

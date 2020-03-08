@@ -228,6 +228,11 @@ QVariant AddressTableModel::data(const QModelIndex &index, int role) const
         default: break;
         }
     }
+    else if (role == Qt::ForegroundRole) {
+        if (rec->type == AddressTableEntry::Receiving && walletModel->wallet().isUsedAddress(DecodeDestination(rec->address.toStdString()))) {
+            return QColor(Qt::lightGray);
+        }
+    }
     return QVariant();
 }
 

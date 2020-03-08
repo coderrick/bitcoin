@@ -221,6 +221,13 @@ public:
         LOCK(m_wallet->cs_wallet);
         return m_wallet->ListLockedCoins(outputs);
     }
+
+     bool isUsedAddress(const CTxDestination& dst) override
+    {   
+        LOCK(m_wallet->cs_wallet);
+        return m_wallet->IsUsedAddress(dst);
+    }
+    
     CTransactionRef createTransaction(const std::vector<CRecipient>& recipients,
         const CCoinControl& coin_control,
         bool sign,
